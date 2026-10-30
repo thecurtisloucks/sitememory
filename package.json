@@ -1,0 +1,31 @@
+{
+  "name": "sitememory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered spatial memory for physical environments.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w @sitememory/api\" \"npm run dev -w @sitememory/web\"",
+    "build": "npm run build -w @sitememory/shared && npm run build -w @sitememory/api && npm run build -w @sitememory/web",
+    "typecheck": "npm run build -w @sitememory/shared && npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.6.2",
+    "prisma": "6.12.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": "^20.0.0 || ^22.0.0 || >=24.0.0"
+  }
+}
