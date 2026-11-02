@@ -12,6 +12,7 @@ import { comparisonRoutes } from "./routes/comparisons.js";
 import { objectRoutes } from "./routes/objects.js";
 import { roomRoutes } from "./routes/rooms.js";
 import { scanRoutes } from "./routes/scans.js";
+import { webRoutes } from "./routes/web.js";
 import { ComparisonService } from "./services/comparison/comparison-service.js";
 import { AssistantService } from "./services/assistant-service.js";
 import { ImageStorage } from "./services/image-storage.js";
@@ -29,6 +30,8 @@ export interface BuildAppOptions {
   objectMemoryService?: ObjectMemoryService;
   comparisonService?: ComparisonService;
   assistantService?: AssistantService;
+  serveWeb?: boolean;
+  webDistDir?: string;
   logger?: boolean;
 }
 
@@ -75,6 +78,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
   if (objectMemoryService) await objectRoutes(app, objectMemoryService);
   if (comparisonService) await comparisonRoutes(app, comparisonService);
   if (assistantService) await assistantRoutes(app, assistantService);
+  if (options.serveWeb ?? env.SERVE_WEB) {
+    await webRoutes(app, options.webDistDir ?? env.WEB_DIST_DIR);
+  }
 
   app.setErrorHandler((error, _request, reply) => {
     if (

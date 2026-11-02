@@ -12,14 +12,17 @@
     "build": "npm run build -w @sitememory/shared && npm run build -w @sitememory/api && npm run build -w @sitememory/web",
     "typecheck": "npm run build -w @sitememory/shared && npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "concurrently": "^9.2.1",
     "prettier": "^3.6.2",
     "prisma": "6.12.0",

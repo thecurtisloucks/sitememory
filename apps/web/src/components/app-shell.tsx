@@ -16,11 +16,14 @@ export function AppShell() {
           </NavLink>
           <div className="flex items-center gap-1 sm:gap-3">
             <span className="hidden items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 text-xs text-slate-400 md:flex">
-              <ScanSearch size={14} className="text-signal" /> Foundation online
+              <ScanSearch size={14} className="text-signal" /> Meta-powered
+              spatial memory
             </span>
             <a
               className="rounded-lg p-2 text-slate-400 transition hover:bg-white/5 hover:text-white"
-              href="https://github.com"
+              href="https://github.com/thecurtisloucks/sitememory"
+              target="_blank"
+              rel="noreferrer"
               aria-label="GitHub"
             >
               <Github size={18} />
@@ -29,7 +32,7 @@ export function AppShell() {
           </div>
         </div>
       </header>
-      <main className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <main className="relative mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
         <Outlet />
       </main>
     </div>

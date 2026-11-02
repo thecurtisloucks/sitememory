@@ -675,6 +675,8 @@ Milestone 5 — Polish and Validation
 
 Target: November 3
 
+Status: implemented and verified November 2, 2026.
+
 Tasks:
 
 - Improve UI.

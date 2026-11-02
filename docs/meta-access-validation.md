@@ -23,10 +23,13 @@ The live provider is therefore available when `VISION_PROVIDER="meta"`. Mock inf
 
 ## Still required before judging
 
-- Run the intended room-photo demo flow with the four configured object prompts.
-- Run assistant questions against those real room observations and retain the evidence-linked result for the demo.
+- Rehearse once with a live camera capture from the intended judging environment.
 - Confirm current account quota and pricing in the Meta developer console.
 - Keep a mock-provider fallback ready in case the external service is unavailable during judging.
+
+## Full workflow validation
+
+On November 2, 2026, the two privacy-safe images under `demo/images` completed the real provider workflow. SAM detected headphones, coffee mug, notebook, and keyboard in the first scan; the second scan omitted headphones. The comparison classified headphones as no longer visible, notebook as moved, and the mug and keyboard as unchanged. Muse Spark returned a non-empty answer to “Where did I last see my headphones?” with only the earlier headphone observation attached as evidence.
 
 ## Official references
 

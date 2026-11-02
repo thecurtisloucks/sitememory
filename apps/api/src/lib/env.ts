@@ -9,6 +9,15 @@ const envSchema = z.object({
   API_HOST: z.string().default("127.0.0.1"),
   API_PORT: z.coerce.number().int().positive().default(3001),
   WEB_ORIGIN: z.string().url().default("http://localhost:5173"),
+  SERVE_WEB: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  WEB_DIST_DIR: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || path.join(repositoryRoot, "apps/web/dist")),
   UPLOAD_DIR: z
     .string()
     .trim()

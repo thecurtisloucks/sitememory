@@ -92,6 +92,11 @@ export function RoomPage() {
           </Button>
         </div>
       </div>
+      {deleteRoom.error ? (
+        <p className="mt-4 rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+          {deleteRoom.error.message}
+        </p>
+      ) : null}
       <section className="mt-10 border-t border-line pt-9">
         <div className="mb-5 flex items-end justify-between">
           <div>
@@ -106,6 +111,10 @@ export function RoomPage() {
         </div>
         {objects.isLoading ? (
           <div className="h-32 animate-pulse rounded-2xl border border-line bg-panel" />
+        ) : objects.isError ? (
+          <p className="rounded-xl bg-rose-500/10 p-4 text-sm text-rose-300">
+            {objects.error.message}
+          </p>
         ) : objects.data?.length ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {objects.data.map((object) => (

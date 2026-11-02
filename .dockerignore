@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+**/dist
+prisma/*.db*
+uploads
+test-results
+playwright-report

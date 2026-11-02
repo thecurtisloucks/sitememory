@@ -34,6 +34,7 @@ npm run build        # production builds for every workspace
 npm run typecheck    # TypeScript checks
 npm test             # unit and API integration tests
 npm run format:check # formatting verification
+npm run test:e2e     # desktop/mobile browser workflow tests
 npm run db:studio    # inspect the SQLite database
 ```
 
@@ -90,6 +91,18 @@ The live providers follow Meta's official Responses API contracts. On November 2
 - [Architecture](docs/architecture.md)
 - [API reference](docs/api.md)
 - [Meta access validation](docs/meta-access-validation.md)
+- [Hackathon demo runbook](docs/demo-runbook.md)
+- [Deployment guide](docs/deployment.md)
+
+## Production container
+
+Build and run the complete application with persistent SQLite and upload storage:
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:3001. The container applies database migrations and serves both the API and built React application.
 
 ## Privacy
 

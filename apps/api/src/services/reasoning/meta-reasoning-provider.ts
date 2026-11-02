@@ -32,8 +32,14 @@ async function readBoundedJson(response: Response) {
 
 function outputText(bodyValue: unknown) {
   const body = asRecord(bodyValue);
-  if (!body || body.status !== "completed" || !Array.isArray(body.output)) {
-    throw new Error("Muse did not return a completed response.");
+  if (!body || !Array.isArray(body.output)) {
+    throw new Error("Muse returned an invalid response.");
+  }
+  if (body.status !== "completed") {
+    const details = asRecord(body.incomplete_details);
+    const reason =
+      typeof details?.reason === "string" ? ` (${details.reason})` : "";
+    throw new Error(`Muse did not return a completed response${reason}.`);
   }
   const parts: string[] = [];
   for (const itemValue of body.output) {
@@ -65,7 +71,9 @@ export class MetaReasoningProvider implements ReasoningProvider {
     const payload = {
       model: this.config.model,
       store: false,
-      max_output_tokens: 800,
+      // Muse reasoning tokens share this budget with the visible answer. A
+      // realistic evidence payload can exhaust 800 tokens before text begins.
+      max_output_tokens: 1_600,
       reasoning: { effort: "low" },
       instructions:
         "You are SiteMemory, an evidence-grounded spatial memory assistant. Answer only from the supplied structured evidence. Never invent a location, object, time, scan, or change. Treat 'no longer visible' as a detection result, not proof that an object was removed. If evidence is missing or ambiguous, say so plainly. Keep the answer concise and do not include raw database IDs; the application attaches evidence links separately.",

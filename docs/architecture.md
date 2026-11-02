@@ -30,3 +30,7 @@ The comparison service prefers confirmed tracked identities and uses a conservat
 Milestone 4 retrieves structured room evidence before any model request. Object questions select matching observation histories; general inventory questions select the latest observation per identity; change questions classify the two newest completed scans. The bounded context is sent through a `ReasoningProvider` implemented by deterministic mock and Meta Muse Spark providers.
 
 The API, rather than the model, owns evidence references. It returns exact scan and observation IDs and uncertainty notes alongside the answer, so the UI can link every supporting claim back to a highlighted source image. Muse is instructed to use only supplied evidence and receives no API credentials in the browser.
+
+## Production topology
+
+The production container builds all workspaces, applies Prisma migrations at startup, and runs a single Fastify process. Fastify serves `/api`, protected uploaded media, immutable Vite assets, and the React SPA fallback. SQLite and uploads share a persistent `/data` volume. This single-instance topology is intentionally scoped to the hackathon prototype.

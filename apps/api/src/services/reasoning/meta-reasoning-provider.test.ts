@@ -53,6 +53,7 @@ describe("MetaReasoningProvider", () => {
     expect(body).toMatchObject({
       model: "muse-spark-1.3",
       store: false,
+      max_output_tokens: 1_600,
       reasoning: { effort: "low" },
     });
     expect(body.input).toContain("observation-1");

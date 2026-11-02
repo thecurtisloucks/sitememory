@@ -23,3 +23,16 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run format:check
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
