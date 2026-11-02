@@ -2,7 +2,7 @@
 
 SiteMemory is an AI-powered spatial memory application for the Meta Global AI Developer Hackathon 2026. It is designed to record physical environments, track observations over time, and answer questions using visual evidence.
 
-Milestone 4 adds an evidence-grounded room assistant powered by Meta Muse Spark. Questions are answered from retrieved observations and recent scan changes, with clickable visual evidence and explicit uncertainty instead of unsupported guesses.
+SiteMemory combines live Meta SAM segmentation, persistent cross-scan identities, temporal comparisons, and an evidence-grounded Muse assistant. Each room can configure its own object vocabulary while retaining reliable defaults for the hackathon demo.
 
 ## Stack
 
@@ -35,6 +35,7 @@ npm run typecheck    # TypeScript checks
 npm test             # unit and API integration tests
 npm run format:check # formatting verification
 npm run test:e2e     # desktop/mobile browser workflow tests
+npm run evaluate     # reproduce the committed quality baseline
 npm run db:studio    # inspect the SQLite database
 ```
 
@@ -93,6 +94,7 @@ The live providers follow Meta's official Responses API contracts. On November 2
 - [Meta access validation](docs/meta-access-validation.md)
 - [Hackathon demo runbook](docs/demo-runbook.md)
 - [Deployment guide](docs/deployment.md)
+- [Evaluation methodology and limitations](docs/evaluation.md)
 
 ## Production container
 

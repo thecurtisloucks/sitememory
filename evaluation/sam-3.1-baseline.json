@@ -1,0 +1,87 @@
+{
+  "capturedAt": "2026-11-02T07:23:39.879Z",
+  "model": "sam-3.1",
+  "fixtures": {
+    "before": [
+      {
+        "label": "headphones",
+        "description": "headphones segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.0388755981,
+          "y": 0.2922422954,
+          "width": 0.259569378,
+          "height": 0.3358129649
+        },
+        "confidence": 0.9804878831
+      },
+      {
+        "label": "coffee mug",
+        "description": "coffee mug segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.778708134,
+          "y": 0.3124335813,
+          "width": 0.1919856459,
+          "height": 0.3166843783
+        },
+        "confidence": 0.9649122953
+      },
+      {
+        "label": "notebook",
+        "description": "notebook segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.3959330144,
+          "y": 0.4250797024,
+          "width": 0.2565789474,
+          "height": 0.4548352816
+        },
+        "confidence": 0.8827838898
+      },
+      {
+        "label": "keyboard",
+        "description": "keyboard segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.3169856459,
+          "y": 0.2359192349,
+          "width": 0.4013157895,
+          "height": 0.1477151966
+        },
+        "confidence": 0.9766081572
+      }
+    ],
+    "after": [
+      {
+        "label": "coffee mug",
+        "description": "coffee mug segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.7781100478,
+          "y": 0.3124335813,
+          "width": 0.1925837321,
+          "height": 0.3166843783
+        },
+        "confidence": 0.960975647
+      },
+      {
+        "label": "notebook",
+        "description": "notebook segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.0610047847,
+          "y": 0.3570669501,
+          "width": 0.2697368421,
+          "height": 0.4505844846
+        },
+        "confidence": 0.7852349281
+      },
+      {
+        "label": "keyboard",
+        "description": "keyboard segmented by Meta SAM 3.1",
+        "boundingBox": {
+          "x": 0.3169856459,
+          "y": 0.2359192349,
+          "width": 0.4013157895,
+          "height": 0.1477151966
+        },
+        "confidence": 0.9766081572
+      }
+    ]
+  }
+}

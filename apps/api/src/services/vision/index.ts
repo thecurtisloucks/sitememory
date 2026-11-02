@@ -3,13 +3,6 @@ import { MockVisionProvider } from "./mock-vision-provider.js";
 import { MetaVisionProvider } from "./meta-vision-provider.js";
 import type { VisionProvider } from "./types.js";
 
-export const DEFAULT_OBJECT_PROMPTS = [
-  "headphones",
-  "coffee mug",
-  "notebook",
-  "keyboard",
-] as const;
-
 export function createVisionProvider(): VisionProvider {
   if (env.VISION_PROVIDER === "mock") return new MockVisionProvider();
   if (!env.META_API_KEY) {

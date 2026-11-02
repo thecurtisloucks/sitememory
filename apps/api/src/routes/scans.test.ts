@@ -65,6 +65,9 @@ const roomRepository: RoomRepository = {
   async create() {
     throw new Error("not used");
   },
+  async update() {
+    return null;
+  },
   async delete() {
     return false;
   },

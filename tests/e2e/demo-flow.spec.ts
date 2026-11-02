@@ -16,6 +16,11 @@ test("primary room memory workflow works from upload through assistant", async (
   await page.getByRole("button", { name: "Create room" }).click();
   await page.getByRole("link", { name: /E2E Office/ }).click();
 
+  await page.getByLabel("Object type to track").fill("desk lamp");
+  await page.getByRole("button", { name: "Add" }).click();
+  await page.getByRole("button", { name: "Save tracking list" }).click();
+  await expect(page.getByText(/Tracking list saved/)).toBeVisible();
+
   await page.locator('input[type="file"]').nth(1).setInputFiles(beforeImage);
   await expect(page).toHaveURL(/\/scans\//);
   await page.getByRole("button", { name: "Analyze with AI" }).click();

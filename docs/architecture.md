@@ -19,6 +19,8 @@ Milestone 2 introduces the explicit `VisionProvider` interface. `MockVisionProvi
 
 Images are sniffed from their bytes, limited to JPEG/PNG/WebP, capped at 10 MB by default, and saved under generated UUID filenames. Clients retrieve media by scan ID rather than supplying filesystem paths.
 
+Each room persists its own validated tracking vocabulary. Scan processing reads those noun phrases immediately before inference, so the product is not limited to the four default demo categories. The list is capped at 12 short unique names to bound latency, cost, and prompt abuse.
+
 ## Spatial memory
 
 Milestone 3 separates a detection (`ObjectObservation`) from the physical identity it may represent (`TrackedObject`). When a scan completes, a deterministic matcher scores same-label candidates using description overlap, normalized center distance, and relative area. It assigns each prior identity at most once per scan. High-confidence matches extend a history, clear non-matches create a new identity, and ambiguous matches remain uncertain and unattached.

@@ -1,4 +1,8 @@
-import type { CreateRoomInput } from "@sitememory/shared";
+import {
+  DEFAULT_OBJECT_PROMPTS,
+  type CreateRoomData,
+  type UpdateRoomInput,
+} from "@sitememory/shared";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app.js";
 import type {
@@ -17,17 +21,26 @@ class MemoryRoomRepository implements RoomRepository {
     return this.rooms.get(id) ?? null;
   }
 
-  async create(input: CreateRoomInput) {
+  async create(input: CreateRoomData) {
     const now = new Date("2026-10-30T12:00:00.000Z");
     const room: StoredRoom = {
       id: `room-${this.rooms.size + 1}`,
       name: input.name,
       description: input.description ?? null,
+      objectPrompts: input.objectPrompts,
       createdAt: now,
       updatedAt: now,
     };
     this.rooms.set(room.id, room);
     return room;
+  }
+
+  async update(id: string, input: UpdateRoomInput) {
+    const room = this.rooms.get(id);
+    if (!room) return null;
+    const updated = { ...room, ...input, updatedAt: new Date() };
+    this.rooms.set(id, updated);
+    return updated;
   }
 
   async delete(id: string) {
@@ -55,9 +68,29 @@ describe("room routes", () => {
 
     expect(created.statusCode).toBe(201);
     expect(created.json().data.name).toBe("Home office");
+    expect(created.json().data.objectPrompts).toEqual(DEFAULT_OBJECT_PROMPTS);
 
     const listed = await app.inject({ method: "GET", url: "/api/rooms" });
     expect(listed.json().data).toHaveLength(1);
+  });
+
+  it("updates the room tracking vocabulary", async () => {
+    await app.inject({
+      method: "POST",
+      url: "/api/rooms",
+      payload: { name: "Garage" },
+    });
+    const response = await app.inject({
+      method: "PATCH",
+      url: "/api/rooms/room-1",
+      payload: { objectPrompts: ["drill", "safety glasses"] },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data.objectPrompts).toEqual([
+      "drill",
+      "safety glasses",
+    ]);
   });
 
   it("returns a useful validation response", async () => {

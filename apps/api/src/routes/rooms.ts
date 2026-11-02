@@ -1,4 +1,4 @@
-import { createRoomSchema } from "@sitememory/shared";
+import { createRoomSchema, updateRoomSchema } from "@sitememory/shared";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type {
@@ -13,6 +13,7 @@ function serializeRoom(room: StoredRoom) {
     id: room.id,
     name: room.name,
     description: room.description,
+    objectPrompts: room.objectPrompts,
     createdAt: room.createdAt.toISOString(),
     updatedAt: room.updatedAt.toISOString(),
     latestScan: room.latestScan
@@ -50,6 +51,18 @@ export async function roomRoutes(
       });
     }
 
+    return { data: serializeRoom(room) };
+  });
+
+  app.patch("/api/rooms/:id", async (request, reply) => {
+    const { id } = idParamsSchema.parse(request.params);
+    const input = updateRoomSchema.parse(request.body);
+    const room = await repository.update(id, input);
+    if (!room) {
+      return reply.code(404).send({
+        error: { code: "ROOM_NOT_FOUND", message: "Room not found" },
+      });
+    }
     return { data: serializeRoom(room) };
   });
 

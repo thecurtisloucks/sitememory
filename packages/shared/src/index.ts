@@ -1,5 +1,36 @@
 import { z } from "zod";
 
+export const DEFAULT_OBJECT_PROMPTS = [
+  "headphones",
+  "coffee mug",
+  "notebook",
+  "keyboard",
+] as const;
+
+export const objectPromptsSchema = z
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1, "Object names cannot be empty")
+      .max(40, "Object names must be 40 characters or fewer")
+      .regex(
+        /^[\p{L}\p{N}][\p{L}\p{N} '&-]*$/u,
+        "Use a short object name without punctuation",
+      ),
+  )
+  .min(1, "Track at least one object")
+  .max(12, "Track no more than 12 objects")
+  .superRefine((items, context) => {
+    const normalized = items.map((item) => item.toLowerCase());
+    if (new Set(normalized).size !== normalized.length) {
+      context.addIssue({
+        code: "custom",
+        message: "Object names must be unique",
+      });
+    }
+  });
+
 export const roomNameSchema = z
   .string()
   .trim()
@@ -14,9 +45,19 @@ export const createRoomSchema = z.object({
     .max(500, "Description must be 500 characters or fewer")
     .optional()
     .transform((value) => value || undefined),
+  objectPrompts: objectPromptsSchema
+    .optional()
+    .default(() => [...DEFAULT_OBJECT_PROMPTS]),
 });
 
-export type CreateRoomInput = z.infer<typeof createRoomSchema>;
+export type CreateRoomInput = z.input<typeof createRoomSchema>;
+export type CreateRoomData = z.output<typeof createRoomSchema>;
+
+export const updateRoomSchema = z.object({
+  objectPrompts: objectPromptsSchema,
+});
+
+export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
 
 export const scanStatusSchema = z.enum([
   "PENDING",
@@ -146,6 +187,7 @@ export interface Room {
   description: string | null;
   createdAt: string;
   updatedAt: string;
+  objectPrompts: string[];
   latestScan: {
     id: string;
     imageUrl: string;

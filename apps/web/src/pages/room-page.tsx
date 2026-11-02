@@ -11,6 +11,7 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ScanStatusBadge } from "../components/scan-status";
 import { ScanUploader } from "../components/scan-uploader";
+import { TrackingPromptEditor } from "../components/tracking-prompt-editor";
 import { Button } from "../components/ui/button";
 import { objectsApi, roomsApi, scansApi } from "../lib/api";
 
@@ -96,6 +97,12 @@ export function RoomPage() {
         <p className="mt-4 rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
           {deleteRoom.error.message}
         </p>
+      ) : null}
+      {room.data ? (
+        <TrackingPromptEditor
+          roomId={roomId}
+          initialPrompts={room.data.objectPrompts}
+        />
       ) : null}
       <section className="mt-10 border-t border-line pt-9">
         <div className="mb-5 flex items-end justify-between">

@@ -6,10 +6,11 @@ import type {
   ScanStatus,
   SegmentationMask,
 } from "@sitememory/shared";
+import { DEFAULT_OBJECT_PROMPTS } from "@sitememory/shared";
 import { HttpError } from "../lib/errors.js";
 import type { AllowedImageType, ImageStorage } from "./image-storage.js";
 import { matchObservations } from "./memory/object-matching.js";
-import { DEFAULT_OBJECT_PROMPTS, type VisionProvider } from "./vision/index.js";
+import type { VisionProvider } from "./vision/index.js";
 
 export interface CreateScanInput {
   roomId: string;
@@ -208,12 +209,23 @@ export class PrismaScanService implements ScanService {
 
     try {
       const bytes = await this.storage.read(scan.imagePath);
+      const room = await this.db.room.findUnique({
+        where: { id: scan.roomId },
+        select: { objectPrompts: true },
+      });
+      const configuredPrompts = safeJson<string[]>(
+        room?.objectPrompts ?? null,
+        [...DEFAULT_OBJECT_PROMPTS],
+      ).slice(0, 12);
       const result = await this.provider.segmentImage({
         bytes,
         mimeType: scan.mimeType as AllowedImageType,
         width: scan.width,
         height: scan.height,
-        prompts: DEFAULT_OBJECT_PROMPTS,
+        prompts:
+          configuredPrompts.length > 0
+            ? configuredPrompts
+            : [...DEFAULT_OBJECT_PROMPTS],
       });
       await this.db.$transaction(async (transaction) => {
         await transaction.objectObservation.deleteMany({ where: { scanId } });

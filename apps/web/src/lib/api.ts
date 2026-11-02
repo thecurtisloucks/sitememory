@@ -8,6 +8,7 @@ import type {
   ScanComparison,
   TrackedObjectHistory,
   TrackedObjectSummary,
+  UpdateRoomInput,
 } from "@sitememory/shared";
 
 const baseUrl = import.meta.env.VITE_API_URL ?? "";
@@ -58,6 +59,13 @@ export const roomsApi = {
     normalizeRoom(
       await request<Room>("/api/rooms", {
         method: "POST",
+        body: JSON.stringify(input),
+      }),
+    ),
+  update: async (id: string, input: UpdateRoomInput) =>
+    normalizeRoom(
+      await request<Room>(`/api/rooms/${id}`, {
+        method: "PATCH",
         body: JSON.stringify(input),
       }),
     ),

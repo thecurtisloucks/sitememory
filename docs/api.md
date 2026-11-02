@@ -7,9 +7,10 @@ All JSON success responses use `{ "data": ... }`. Errors use `{ "error": { "code
 - `GET /api/rooms`
 - `POST /api/rooms` with `{ "name": string, "description"?: string }`
 - `GET /api/rooms/:id`
+- `PATCH /api/rooms/:id` with `{ "objectPrompts": string[] }`
 - `DELETE /api/rooms/:id` (also removes scan rows, observations, and stored image files)
 
-Room responses include `latestScan` when available.
+Room responses include `latestScan` when available and a validated `objectPrompts` tracking vocabulary. Rooms default to headphones, coffee mug, notebook, and keyboard; users can configure 1–12 unique noun phrases of up to 40 characters. New processing requests use the room's current vocabulary.
 
 ## Scans
 
