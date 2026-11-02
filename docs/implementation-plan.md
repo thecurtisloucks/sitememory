@@ -639,6 +639,8 @@ Milestone 3 — Spatial Memory
 
 Target: November 1
 
+Status: implemented and verified November 2, 2026.
+
 Tasks:
 
 - Implement tracked objects.

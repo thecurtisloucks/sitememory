@@ -49,6 +49,9 @@ export interface ObjectObservation {
   boundingBox: BoundingBox;
   mask: SegmentationMask | null;
   confidence: number | null;
+  trackedObjectId: string | null;
+  matchStatus: "NEW" | "MATCHED" | "UNCERTAIN" | "UNMATCHED";
+  matchingConfidence: number | null;
   createdAt: string;
 }
 
@@ -68,6 +71,53 @@ export interface Scan {
   errorMessage: string | null;
   provider: "mock" | "meta";
   observations: ObjectObservation[];
+}
+
+export interface TrackedObjectSummary {
+  id: string;
+  roomId: string;
+  label: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  observationCount: number;
+  latestObservation:
+    | (ObjectObservation & {
+        scan: Pick<Scan, "id" | "imageUrl" | "capturedAt" | "provider">;
+      })
+    | null;
+}
+
+export interface TrackedObjectHistory extends TrackedObjectSummary {
+  observations: Array<
+    ObjectObservation & {
+      scan: Pick<Scan, "id" | "imageUrl" | "capturedAt" | "provider">;
+    }
+  >;
+}
+
+export type ChangeClassification =
+  "UNCHANGED" | "MOVED" | "NEWLY_VISIBLE" | "NO_LONGER_VISIBLE" | "UNCERTAIN";
+
+export interface ComparisonChange {
+  classification: ChangeClassification;
+  label: string;
+  sourceObservationId: string | null;
+  targetObservationId: string | null;
+  trackedObjectId: string | null;
+  matchingScore: number | null;
+  explanation: string;
+}
+
+export interface ScanComparison {
+  id: string;
+  roomId: string;
+  sourceScanId: string;
+  targetScanId: string;
+  createdAt: string;
+  changes: ComparisonChange[];
+  sourceScan: Scan;
+  targetScan: Scan;
 }
 
 export interface Room {

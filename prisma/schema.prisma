@@ -8,12 +8,14 @@ datasource db {
 }
 
 model Room {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  scans       Scan[]
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  scans          Scan[]
+  trackedObjects TrackedObject[]
+  comparisons    ScanComparison[]
 }
 
 model Scan {
@@ -34,20 +36,54 @@ model Scan {
   provider         String              @default("mock")
   rawResponse      String?
   observations     ObjectObservation[]
+  sourceComparisons ScanComparison[]    @relation("SourceScan")
+  targetComparisons ScanComparison[]    @relation("TargetScan")
 
   @@index([roomId, capturedAt])
 }
 
 model ObjectObservation {
-  id            String   @id @default(cuid())
-  scanId        String
-  scan          Scan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
-  label         String
-  description   String
-  boundingBox   String
-  maskReference String?
-  confidence    Float?
-  createdAt     DateTime @default(now())
+  id                 String         @id @default(cuid())
+  scanId             String
+  scan               Scan           @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  trackedObjectId    String?
+  trackedObject      TrackedObject? @relation(fields: [trackedObjectId], references: [id], onDelete: SetNull)
+  label              String
+  description        String
+  boundingBox        String
+  maskReference      String?
+  confidence         Float?
+  matchStatus        String         @default("UNMATCHED")
+  matchingConfidence Float?
+  createdAt          DateTime       @default(now())
 
   @@index([scanId])
+  @@index([trackedObjectId])
+}
+
+model TrackedObject {
+  id           String              @id @default(cuid())
+  roomId       String
+  room         Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  label        String
+  description  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  observations ObjectObservation[]
+
+  @@index([roomId, label])
+}
+
+model ScanComparison {
+  id           String   @id @default(cuid())
+  roomId       String
+  room         Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sourceScanId String
+  sourceScan   Scan     @relation("SourceScan", fields: [sourceScanId], references: [id], onDelete: Cascade)
+  targetScanId String
+  targetScan   Scan     @relation("TargetScan", fields: [targetScanId], references: [id], onDelete: Cascade)
+  results      String
+  createdAt    DateTime @default(now())
+
+  @@index([roomId, createdAt])
 }

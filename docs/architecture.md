@@ -6,6 +6,8 @@ SiteMemory is a TypeScript-first npm workspaces monorepo. The React client commu
 React + TanStack Query -> Fastify routes -> services/repositories -> Prisma -> SQLite
                                       |-> private upload storage
                                       |-> VisionProvider -> Mock or Meta SAM 3.1
+                                      |-> object matcher -> persistent identity/history
+                                      |-> change classifier -> saved scan comparison
 ```
 
 Shared request validation and transport types live in `packages/shared`. API route handlers depend on repository interfaces, which keeps integration tests deterministic and makes later persistence changes isolated.
@@ -15,3 +17,9 @@ Shared request validation and transport types live in `packages/shared`. API rou
 Milestone 2 introduces the explicit `VisionProvider` interface. `MockVisionProvider` provides deterministic local results; `MetaVisionProvider` uses the Meta Responses API and official `@meta-sam/parser`. Provider credentials remain server-side, and every scan persists its provider provenance so mock and live results are visibly distinguishable.
 
 Images are sniffed from their bytes, limited to JPEG/PNG/WebP, capped at 10 MB by default, and saved under generated UUID filenames. Clients retrieve media by scan ID rather than supplying filesystem paths.
+
+## Spatial memory
+
+Milestone 3 separates a detection (`ObjectObservation`) from the physical identity it may represent (`TrackedObject`). When a scan completes, a deterministic matcher scores same-label candidates using description overlap, normalized center distance, and relative area. It assigns each prior identity at most once per scan. High-confidence matches extend a history, clear non-matches create a new identity, and ambiguous matches remain uncertain and unattached.
+
+The comparison service prefers confirmed tracked identities and uses a conservative label-and-geometry fallback for unmatched detections. It saves classifications and explanatory evidence while treating failed detection as “no longer visible,” never proof that an object left the room.

@@ -1,8 +1,14 @@
 import path from "node:path";
 import type { PrismaClient } from "@prisma/client";
-import type { Scan, ScanStatus, SegmentationMask } from "@sitememory/shared";
+import type {
+  ObjectObservation,
+  Scan,
+  ScanStatus,
+  SegmentationMask,
+} from "@sitememory/shared";
 import { HttpError } from "../lib/errors.js";
 import type { AllowedImageType, ImageStorage } from "./image-storage.js";
+import { matchObservations } from "./memory/object-matching.js";
 import { DEFAULT_OBJECT_PROMPTS, type VisionProvider } from "./vision/index.js";
 
 export interface CreateScanInput {
@@ -25,14 +31,17 @@ export interface ScanService {
   deleteFilesForRoom(roomId: string): Promise<void>;
 }
 
-type ObservationRecord = {
+export type ObservationRecord = {
   id: string;
   scanId: string;
+  trackedObjectId: string | null;
   label: string;
   description: string;
   boundingBox: string;
   maskReference: string | null;
   confidence: number | null;
+  matchStatus: string;
+  matchingConfidence: number | null;
   createdAt: Date;
 };
 
@@ -54,7 +63,7 @@ type ScanRecord = {
   observations?: ObservationRecord[];
 };
 
-function safeJson<T>(value: string | null, fallback: T): T {
+export function safeJson<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
   try {
     return JSON.parse(value) as T;
@@ -72,7 +81,30 @@ function sanitizeFilename(filename: string) {
   );
 }
 
-function serializeScan(scan: ScanRecord): Scan {
+export function serializeObservation(
+  observation: ObservationRecord,
+): ObjectObservation {
+  return {
+    id: observation.id,
+    scanId: observation.scanId,
+    label: observation.label,
+    description: observation.description,
+    boundingBox: safeJson(observation.boundingBox, {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    }),
+    mask: safeJson<SegmentationMask | null>(observation.maskReference, null),
+    confidence: observation.confidence,
+    trackedObjectId: observation.trackedObjectId,
+    matchStatus: observation.matchStatus as ObjectObservation["matchStatus"],
+    matchingConfidence: observation.matchingConfidence,
+    createdAt: observation.createdAt.toISOString(),
+  };
+}
+
+export function serializeScan(scan: ScanRecord): Scan {
   return {
     id: scan.id,
     roomId: scan.roomId,
@@ -88,21 +120,7 @@ function serializeScan(scan: ScanRecord): Scan {
     status: scan.status as ScanStatus,
     errorMessage: scan.errorMessage,
     provider: scan.provider as Scan["provider"],
-    observations: (scan.observations ?? []).map((observation) => ({
-      id: observation.id,
-      scanId: observation.scanId,
-      label: observation.label,
-      description: observation.description,
-      boundingBox: safeJson(observation.boundingBox, {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-      }),
-      mask: safeJson<SegmentationMask | null>(observation.maskReference, null),
-      confidence: observation.confidence,
-      createdAt: observation.createdAt.toISOString(),
-    })),
+    observations: (scan.observations ?? []).map(serializeObservation),
   };
 }
 
@@ -199,16 +217,66 @@ export class PrismaScanService implements ScanService {
       });
       await this.db.$transaction(async (transaction) => {
         await transaction.objectObservation.deleteMany({ where: { scanId } });
-        if (result.objects.length > 0) {
-          await transaction.objectObservation.createMany({
-            data: result.objects.map((object) => ({
+        await transaction.trackedObject.deleteMany({
+          where: { roomId: scan.roomId, observations: { none: {} } },
+        });
+        const trackedObjects = await transaction.trackedObject.findMany({
+          where: { roomId: scan.roomId },
+          include: {
+            observations: { orderBy: { createdAt: "desc" }, take: 1 },
+          },
+        });
+        const candidates = trackedObjects.flatMap((trackedObject) => {
+          const latest = trackedObject.observations[0];
+          return latest
+            ? [
+                {
+                  trackedObjectId: trackedObject.id,
+                  label: trackedObject.label,
+                  description: latest.description,
+                  boundingBox: safeJson(latest.boundingBox, {
+                    x: 0,
+                    y: 0,
+                    width: 0,
+                    height: 0,
+                  }),
+                },
+              ]
+            : [];
+        });
+        const decisions = matchObservations(result.objects, candidates);
+        for (let index = 0; index < result.objects.length; index += 1) {
+          const object = result.objects[index];
+          const decision = decisions[index];
+          if (!object || !decision) continue;
+          let trackedObjectId = decision.trackedObjectId;
+          if (decision.status === "NEW") {
+            const tracked = await transaction.trackedObject.create({
+              data: {
+                roomId: scan.roomId,
+                label: object.label,
+                description: object.description,
+              },
+            });
+            trackedObjectId = tracked.id;
+          } else if (trackedObjectId) {
+            await transaction.trackedObject.update({
+              where: { id: trackedObjectId },
+              data: { updatedAt: new Date() },
+            });
+          }
+          await transaction.objectObservation.create({
+            data: {
               scanId,
+              trackedObjectId,
               label: object.label,
               description: object.description,
               boundingBox: JSON.stringify(object.boundingBox),
               maskReference: object.mask ? JSON.stringify(object.mask) : null,
               confidence: object.confidence,
-            })),
+              matchStatus: decision.status,
+              matchingConfidence: decision.score,
+            },
           });
         }
         await transaction.scan.update({

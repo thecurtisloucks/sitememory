@@ -7,9 +7,13 @@ import { HttpError } from "./lib/errors.js";
 import { prisma } from "./lib/prisma.js";
 import { PrismaRoomRepository } from "./repositories/prisma-room-repository.js";
 import type { RoomRepository } from "./repositories/room-repository.js";
+import { comparisonRoutes } from "./routes/comparisons.js";
+import { objectRoutes } from "./routes/objects.js";
 import { roomRoutes } from "./routes/rooms.js";
 import { scanRoutes } from "./routes/scans.js";
+import { ComparisonService } from "./services/comparison/comparison-service.js";
 import { ImageStorage } from "./services/image-storage.js";
+import { ObjectMemoryService } from "./services/memory/object-memory-service.js";
 import {
   PrismaScanService,
   type ScanService,
@@ -19,6 +23,8 @@ import { createVisionProvider } from "./services/vision/index.js";
 export interface BuildAppOptions {
   roomRepository?: RoomRepository;
   scanService?: ScanService;
+  objectMemoryService?: ObjectMemoryService;
+  comparisonService?: ComparisonService;
   logger?: boolean;
 }
 
@@ -34,6 +40,14 @@ export async function buildApp(options: BuildAppOptions = {}) {
           new ImageStorage(env.UPLOAD_DIR, env.MAX_UPLOAD_BYTES),
           createVisionProvider(),
         ));
+  const objectMemoryService =
+    options.objectMemoryService ??
+    (options.roomRepository ? undefined : new ObjectMemoryService(prisma));
+  const comparisonService =
+    options.comparisonService ??
+    (options.roomRepository || !scanService
+      ? undefined
+      : new ComparisonService(prisma, scanService));
 
   await app.register(cors, { origin: env.WEB_ORIGIN });
   await app.register(multipart, {
@@ -49,6 +63,8 @@ export async function buildApp(options: BuildAppOptions = {}) {
       : undefined,
   );
   if (scanService) await scanRoutes(app, scanService);
+  if (objectMemoryService) await objectRoutes(app, objectMemoryService);
+  if (comparisonService) await comparisonRoutes(app, comparisonService);
 
   app.setErrorHandler((error, _request, reply) => {
     if (

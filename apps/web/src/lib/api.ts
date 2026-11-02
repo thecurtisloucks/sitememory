@@ -4,6 +4,9 @@ import type {
   CreateRoomInput,
   Room,
   Scan,
+  ScanComparison,
+  TrackedObjectHistory,
+  TrackedObjectSummary,
 } from "@sitememory/shared";
 
 const baseUrl = import.meta.env.VITE_API_URL ?? "";
@@ -79,5 +82,61 @@ export const scansApi = {
   process: async (scanId: string) =>
     normalizeScan(
       await request<Scan>(`/api/scans/${scanId}/process`, { method: "POST" }),
+    ),
+};
+
+function normalizeObservationScan<
+  T extends TrackedObjectSummary | TrackedObjectHistory,
+>(object: T): T {
+  const normalizeObservation = (
+    observation: NonNullable<TrackedObjectSummary["latestObservation"]>,
+  ) => ({
+    ...observation,
+    scan: {
+      ...observation.scan,
+      imageUrl: `${baseUrl}${observation.scan.imageUrl}`,
+    },
+  });
+  return {
+    ...object,
+    latestObservation: object.latestObservation
+      ? normalizeObservation(object.latestObservation)
+      : null,
+    ...("observations" in object
+      ? { observations: object.observations.map(normalizeObservation) }
+      : {}),
+  } as T;
+}
+
+function normalizeComparison(comparison: ScanComparison): ScanComparison {
+  return {
+    ...comparison,
+    sourceScan: normalizeScan(comparison.sourceScan),
+    targetScan: normalizeScan(comparison.targetScan),
+  };
+}
+
+export const objectsApi = {
+  list: async (roomId: string) =>
+    (await request<TrackedObjectSummary[]>(`/api/rooms/${roomId}/objects`)).map(
+      normalizeObservationScan,
+    ),
+  history: async (objectId: string) =>
+    normalizeObservationScan(
+      await request<TrackedObjectHistory>(`/api/objects/${objectId}/history`),
+    ),
+};
+
+export const comparisonsApi = {
+  create: async (roomId: string, sourceScanId: string, targetScanId: string) =>
+    normalizeComparison(
+      await request<ScanComparison>(`/api/rooms/${roomId}/compare`, {
+        method: "POST",
+        body: JSON.stringify({ sourceScanId, targetScanId }),
+      }),
+    ),
+  get: async (comparisonId: string) =>
+    normalizeComparison(
+      await request<ScanComparison>(`/api/comparisons/${comparisonId}`),
     ),
 };

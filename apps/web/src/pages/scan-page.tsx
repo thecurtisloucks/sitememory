@@ -151,6 +151,20 @@ export function ScanPage() {
                     No confidence provided
                   </p>
                 )}
+                {active.trackedObjectId ? (
+                  <Link
+                    to={`/objects/${active.trackedObjectId}`}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-signal hover:text-emerald-200"
+                  >
+                    View observation history{" "}
+                    <ArrowLeft size={14} className="rotate-180" />
+                  </Link>
+                ) : active.matchStatus === "UNCERTAIN" ? (
+                  <p className="mt-4 rounded-lg bg-violet-400/10 px-3 py-2 text-xs text-violet-200">
+                    Identity match is uncertain; this observation was not forced
+                    into a tracked object.
+                  </p>
+                ) : null}
               </div>
               <div className="mt-4 space-y-2">
                 {data.observations.map((observation) => (
