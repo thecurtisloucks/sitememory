@@ -13,4 +13,41 @@ model Room {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  scans       Scan[]
+}
+
+model Scan {
+  id               String              @id @default(cuid())
+  roomId           String
+  room             Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  imagePath        String
+  originalFilename String
+  mimeType         String
+  byteSize         Int
+  width            Int
+  height           Int
+  capturedAt       DateTime            @default(now())
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  status           String              @default("PENDING")
+  errorMessage     String?
+  provider         String              @default("mock")
+  rawResponse      String?
+  observations     ObjectObservation[]
+
+  @@index([roomId, capturedAt])
+}
+
+model ObjectObservation {
+  id            String   @id @default(cuid())
+  scanId        String
+  scan          Scan     @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  label         String
+  description   String
+  boundingBox   String
+  maskReference String?
+  confidence    Float?
+  createdAt     DateTime @default(now())
+
+  @@index([scanId])
 }

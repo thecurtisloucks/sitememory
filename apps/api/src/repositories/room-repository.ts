@@ -6,6 +6,12 @@ export interface StoredRoom {
   description: string | null;
   createdAt: Date;
   updatedAt: Date;
+  latestScan?: {
+    id: string;
+    capturedAt: Date;
+    status: string;
+    provider: string;
+  } | null;
 }
 
 export interface RoomRepository {

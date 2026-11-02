@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Camera, ScanLine, Trash2 } from "lucide-react";
+import { ArrowLeft, Clock3, ScanLine, Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { ScanStatusBadge } from "../components/scan-status";
+import { ScanUploader } from "../components/scan-uploader";
 import { Button } from "../components/ui/button";
-import { roomsApi } from "../lib/api";
+import { roomsApi, scansApi } from "../lib/api";
 
 export function RoomPage() {
   const { roomId = "" } = useParams();
@@ -11,6 +13,10 @@ export function RoomPage() {
   const room = useQuery({
     queryKey: ["room", roomId],
     queryFn: () => roomsApi.get(roomId),
+  });
+  const scans = useQuery({
+    queryKey: ["scans", roomId],
+    queryFn: () => scansApi.list(roomId),
   });
   const deleteRoom = useMutation({
     mutationFn: () => roomsApi.delete(roomId),
@@ -59,19 +65,78 @@ export function RoomPage() {
           {deleteRoom.isPending ? "Deleting…" : "Delete room"}
         </Button>
       </div>
-      <section className="mt-10 rounded-2xl border border-dashed border-line bg-panel/60 p-10 text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-signal/20 bg-signal/10 text-signal">
-          <Camera size={24} />
-        </div>
-        <h2 className="mt-5 font-semibold text-white">No scans yet</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-          Image scanning arrives in Milestone 2. This room is persisted and
-          ready for its first observation.
-        </p>
-        <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-xs text-slate-500">
-          <ScanLine size={13} /> SAM 3.1 access validation in progress
-        </span>
-      </section>
+      <div className="mt-10 grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <ScanUploader roomId={roomId} />
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-white">Scan history</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Every observation remains available as evidence.
+              </p>
+            </div>
+            <span className="text-sm text-slate-600">
+              {scans.data?.length ?? 0} total
+            </span>
+          </div>
+          {scans.isLoading ? (
+            <div className="h-52 animate-pulse rounded-2xl border border-line bg-panel" />
+          ) : scans.isError ? (
+            <p className="rounded-xl bg-rose-500/10 p-4 text-sm text-rose-300">
+              {scans.error.message}
+            </p>
+          ) : scans.data?.length ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {scans.data.map((scan) => (
+                <Link
+                  key={scan.id}
+                  to={`/scans/${scan.id}`}
+                  className="group overflow-hidden rounded-2xl border border-line bg-panel transition hover:border-signal/30"
+                >
+                  <div className="aspect-[16/10] overflow-hidden bg-black">
+                    <img
+                      src={scan.imageUrl}
+                      alt="Room observation"
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <ScanStatusBadge status={scan.status} />
+                      <span
+                        className={
+                          scan.provider === "meta"
+                            ? "text-xs font-medium text-signal"
+                            : "text-xs font-medium text-violet-300"
+                        }
+                      >
+                        {scan.provider === "meta" ? "LIVE" : "MOCK"}
+                      </span>
+                    </div>
+                    <p className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                      <Clock3 size={13} />{" "}
+                      {new Date(scan.capturedAt).toLocaleString()}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-400">
+                      {scan.observations.length} object
+                      {scan.observations.length === 1 ? "" : "s"} detected
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-line bg-panel/60 p-10 text-center">
+              <ScanLine className="mx-auto text-slate-700" size={28} />
+              <h3 className="mt-4 font-semibold text-white">No scans yet</h3>
+              <p className="mt-2 text-sm text-slate-500">
+                Take a photo or choose an image to start this room’s visual
+                history.
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

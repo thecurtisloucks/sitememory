@@ -2,7 +2,7 @@
 
 SiteMemory is an AI-powered spatial memory application for the Meta Global AI Developer Hackathon 2026. It is designed to record physical environments, track observations over time, and answer questions using visual evidence.
 
-Milestone 1 provides a working TypeScript monorepo, persistent rooms, a Fastify API, and a polished React dashboard. Image scanning and live Meta inference are intentionally reserved for Milestone 2.
+Milestone 2 adds secure image uploads, persistent scan history, retryable processing, object observations, interactive segmentation overlays, deterministic mock inference, and an opt-in live Meta SAM 3.1 provider.
 
 ## Stack
 
@@ -37,31 +37,56 @@ npm run format:check # formatting verification
 npm run db:studio    # inspect the SQLite database
 ```
 
+## Vision providers
+
+Mock inference is the safe default and is always labeled as mock data in the UI:
+
+```dotenv
+VISION_PROVIDER="mock"
+```
+
+For real SAM 3.1 inference, create a Meta Model API credential and set backend-only values in `.env`:
+
+```dotenv
+VISION_PROVIDER="meta"
+META_API_KEY="your-key"
+META_API_BASE_URL="https://api.meta.ai/v1"
+META_SAM_MODEL="sam-3.1"
+```
+
+Restart the API after changing provider configuration. The key is never sent to the browser. Live inference sends the four core demo noun phrases—headphones, coffee mug, notebook, and keyboard—through the Meta Responses API and stores normalized boxes, decoded SVG masks, optional model confidence, diagnostics, and raw SAM output.
+
 ## API
 
-| Method   | Endpoint         | Purpose        |
-| -------- | ---------------- | -------------- |
-| `GET`    | `/api/health`    | Service health |
-| `GET`    | `/api/rooms`     | List rooms     |
-| `POST`   | `/api/rooms`     | Create a room  |
-| `GET`    | `/api/rooms/:id` | Get a room     |
-| `DELETE` | `/api/rooms/:id` | Delete a room  |
+| Method   | Endpoint                     | Purpose                     |
+| -------- | ---------------------------- | --------------------------- |
+| `GET`    | `/api/health`                | Service health              |
+| `GET`    | `/api/rooms`                 | List rooms                  |
+| `POST`   | `/api/rooms`                 | Create a room               |
+| `GET`    | `/api/rooms/:id`             | Get a room                  |
+| `DELETE` | `/api/rooms/:id`             | Delete a room               |
+| `GET`    | `/api/rooms/:roomId/scans`   | List room scans             |
+| `POST`   | `/api/rooms/:roomId/scans`   | Upload an image             |
+| `GET`    | `/api/scans/:scanId`         | Get a scan and observations |
+| `GET`    | `/api/scans/:scanId/image`   | Read the stored image       |
+| `POST`   | `/api/scans/:scanId/process` | Process or retry a scan     |
 
 Responses use `{ "data": ... }` on success and `{ "error": { "code", "message" } }` on failure.
 
 ## Meta integration status
 
-SAM 3.1 is the critical Milestone 2 dependency. Current official public Meta material confirms the model and its text-prompted segmentation capabilities, but this repository does not guess authenticated API details. See [the access validation checklist](docs/meta-access-validation.md).
+The live provider follows Meta's official `meta-models/meta-sam` request and parser contracts. Real account access still needs to be validated with your own credential before the demo. See [the access validation checklist](docs/meta-access-validation.md).
 
 ## Documentation
 
 - [Full implementation plan](docs/implementation-plan.md)
 - [Architecture](docs/architecture.md)
+- [API reference](docs/api.md)
 - [Meta access validation](docs/meta-access-validation.md)
 
 ## Privacy
 
-Do not commit room photographs, API keys, `.env` files, or local databases. Images introduced in later milestones must be validated, stored outside source control, and clearly disclosed as AI-processed content.
+Do not commit room photographs, API keys, `.env` files, or local databases. Uploaded images are byte-validated, stored under `uploads/` outside source control, and clearly disclosed as AI-processed content.
 
 ## License
 

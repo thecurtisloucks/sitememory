@@ -71,7 +71,15 @@ export function DashboardPage() {
               className="group overflow-hidden rounded-2xl border border-line bg-panel transition hover:-translate-y-0.5 hover:border-signal/30 hover:shadow-glow"
             >
               <div className="relative h-28 overflow-hidden border-b border-line bg-[#0c1118]">
-                <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(110,231,199,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(110,231,199,.05)_1px,transparent_1px)] [background-size:24px_24px]" />
+                {room.latestScan ? (
+                  <img
+                    src={room.latestScan.imageUrl}
+                    alt="Latest room scan"
+                    className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-300 group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(110,231,199,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(110,231,199,.05)_1px,transparent_1px)] [background-size:24px_24px]" />
+                )}
                 <div className="absolute left-5 top-5 grid h-11 w-11 place-items-center rounded-xl border border-signal/20 bg-signal/10 text-signal">
                   {index % 2 ? <Layers3 size={21} /> : <Camera size={21} />}
                 </div>

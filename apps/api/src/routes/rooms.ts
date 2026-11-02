@@ -10,15 +10,25 @@ const idParamsSchema = z.object({ id: z.string().min(1) });
 
 function serializeRoom(room: StoredRoom) {
   return {
-    ...room,
+    id: room.id,
+    name: room.name,
+    description: room.description,
     createdAt: room.createdAt.toISOString(),
     updatedAt: room.updatedAt.toISOString(),
+    latestScan: room.latestScan
+      ? {
+          ...room.latestScan,
+          imageUrl: `/api/scans/${room.latestScan.id}/image`,
+          capturedAt: room.latestScan.capturedAt.toISOString(),
+        }
+      : null,
   };
 }
 
 export async function roomRoutes(
   app: FastifyInstance,
   repository: RoomRepository,
+  beforeDelete?: (roomId: string) => Promise<void>,
 ) {
   app.get("/api/rooms", async () => ({
     data: (await repository.list()).map(serializeRoom),
@@ -45,6 +55,7 @@ export async function roomRoutes(
 
   app.delete("/api/rooms/:id", async (request, reply) => {
     const { id } = idParamsSchema.parse(request.params);
+    if (beforeDelete) await beforeDelete(id);
     const deleted = await repository.delete(id);
 
     if (!deleted) {
