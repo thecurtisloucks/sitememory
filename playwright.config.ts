@@ -19,7 +19,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        "node tests/e2e/prepare.mjs && npm run db:deploy && npm run dev -w @sitememory/api",
+        "node tests/e2e/prepare.mjs && npm run db:deploy && npm run build -w @sitememory/shared && npm run dev -w @sitememory/api",
       url: "http://127.0.0.1:3101/api/health",
       timeout: 120_000,
       reuseExistingServer: false,
