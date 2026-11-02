@@ -7,13 +7,16 @@ import { HttpError } from "./lib/errors.js";
 import { prisma } from "./lib/prisma.js";
 import { PrismaRoomRepository } from "./repositories/prisma-room-repository.js";
 import type { RoomRepository } from "./repositories/room-repository.js";
+import { assistantRoutes } from "./routes/assistant.js";
 import { comparisonRoutes } from "./routes/comparisons.js";
 import { objectRoutes } from "./routes/objects.js";
 import { roomRoutes } from "./routes/rooms.js";
 import { scanRoutes } from "./routes/scans.js";
 import { ComparisonService } from "./services/comparison/comparison-service.js";
+import { AssistantService } from "./services/assistant-service.js";
 import { ImageStorage } from "./services/image-storage.js";
 import { ObjectMemoryService } from "./services/memory/object-memory-service.js";
+import { createReasoningProvider } from "./services/reasoning/index.js";
 import {
   PrismaScanService,
   type ScanService,
@@ -25,6 +28,7 @@ export interface BuildAppOptions {
   scanService?: ScanService;
   objectMemoryService?: ObjectMemoryService;
   comparisonService?: ComparisonService;
+  assistantService?: AssistantService;
   logger?: boolean;
 }
 
@@ -48,6 +52,11 @@ export async function buildApp(options: BuildAppOptions = {}) {
     (options.roomRepository || !scanService
       ? undefined
       : new ComparisonService(prisma, scanService));
+  const assistantService =
+    options.assistantService ??
+    (options.roomRepository
+      ? undefined
+      : new AssistantService(prisma, createReasoningProvider()));
 
   await app.register(cors, { origin: env.WEB_ORIGIN });
   await app.register(multipart, {
@@ -65,6 +74,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   if (scanService) await scanRoutes(app, scanService);
   if (objectMemoryService) await objectRoutes(app, objectMemoryService);
   if (comparisonService) await comparisonRoutes(app, comparisonService);
+  if (assistantService) await assistantRoutes(app, assistantService);
 
   app.setErrorHandler((error, _request, reply) => {
     if (

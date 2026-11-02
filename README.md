@@ -2,7 +2,7 @@
 
 SiteMemory is an AI-powered spatial memory application for the Meta Global AI Developer Hackathon 2026. It is designed to record physical environments, track observations over time, and answer questions using visual evidence.
 
-Milestone 3 adds persistent object identities across scans, evidence-backed observation histories, and saved temporal comparisons that distinguish unchanged, moved, newly visible, no-longer-visible, and uncertain objects. It builds on the secure image pipeline and live Meta SAM 3.1 integration from Milestone 2.
+Milestone 4 adds an evidence-grounded room assistant powered by Meta Muse Spark. Questions are answered from retrieved observations and recent scan changes, with clickable visual evidence and explicit uncertainty instead of unsupported guesses.
 
 ## Stack
 
@@ -49,37 +49,40 @@ For real SAM 3.1 inference, create a Meta Model API credential and set backend-o
 
 ```dotenv
 VISION_PROVIDER="meta"
+REASONING_PROVIDER="meta"
 META_API_KEY="your-key"
 META_API_BASE_URL="https://api.meta.ai/v1"
 META_SAM_MODEL="sam-3.1"
+META_MUSE_MODEL="muse-spark-1.3"
 ```
 
 Restart the API after changing provider configuration. The key is never sent to the browser. Live inference sends the four core demo noun phrases—headphones, coffee mug, notebook, and keyboard—through the Meta Responses API and stores normalized boxes, decoded SVG masks, optional model confidence, diagnostics, and raw SAM output.
 
 ## API
 
-| Method   | Endpoint                         | Purpose                      |
-| -------- | -------------------------------- | ---------------------------- |
-| `GET`    | `/api/health`                    | Service health               |
-| `GET`    | `/api/rooms`                     | List rooms                   |
-| `POST`   | `/api/rooms`                     | Create a room                |
-| `GET`    | `/api/rooms/:id`                 | Get a room                   |
-| `DELETE` | `/api/rooms/:id`                 | Delete a room                |
-| `GET`    | `/api/rooms/:roomId/scans`       | List room scans              |
-| `POST`   | `/api/rooms/:roomId/scans`       | Upload an image              |
-| `GET`    | `/api/scans/:scanId`             | Get a scan and observations  |
-| `GET`    | `/api/scans/:scanId/image`       | Read the stored image        |
-| `POST`   | `/api/scans/:scanId/process`     | Process or retry a scan      |
-| `GET`    | `/api/rooms/:roomId/objects`     | List persistent objects      |
-| `GET`    | `/api/objects/:objectId/history` | Read object evidence history |
-| `POST`   | `/api/rooms/:roomId/compare`     | Compare two completed scans  |
-| `GET`    | `/api/comparisons/:comparisonId` | Read a saved comparison      |
+| Method   | Endpoint                         | Purpose                           |
+| -------- | -------------------------------- | --------------------------------- |
+| `GET`    | `/api/health`                    | Service health                    |
+| `GET`    | `/api/rooms`                     | List rooms                        |
+| `POST`   | `/api/rooms`                     | Create a room                     |
+| `GET`    | `/api/rooms/:id`                 | Get a room                        |
+| `DELETE` | `/api/rooms/:id`                 | Delete a room                     |
+| `GET`    | `/api/rooms/:roomId/scans`       | List room scans                   |
+| `POST`   | `/api/rooms/:roomId/scans`       | Upload an image                   |
+| `GET`    | `/api/scans/:scanId`             | Get a scan and observations       |
+| `GET`    | `/api/scans/:scanId/image`       | Read the stored image             |
+| `POST`   | `/api/scans/:scanId/process`     | Process or retry a scan           |
+| `GET`    | `/api/rooms/:roomId/objects`     | List persistent objects           |
+| `GET`    | `/api/objects/:objectId/history` | Read object evidence history      |
+| `POST`   | `/api/rooms/:roomId/compare`     | Compare two completed scans       |
+| `GET`    | `/api/comparisons/:comparisonId` | Read a saved comparison           |
+| `POST`   | `/api/rooms/:roomId/ask`         | Ask an evidence-grounded question |
 
 Responses use `{ "data": ... }` on success and `{ "error": { "code", "message" } }` on failure.
 
 ## Meta integration status
 
-The live provider follows Meta's official `meta-models/meta-sam` request and parser contracts. On November 2, 2026, the configured developer credential successfully listed `sam-3.1` and completed a real six-object segmentation against Meta's public test image. See [the access validation record](docs/meta-access-validation.md).
+The live providers follow Meta's official Responses API contracts. On November 2, 2026, the configured developer credential successfully exercised both SAM 3.1 segmentation and Muse Spark 1.3 grounded reasoning. See [the access validation record](docs/meta-access-validation.md).
 
 ## Documentation
 

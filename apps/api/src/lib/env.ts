@@ -20,9 +20,11 @@ const envSchema = z.object({
     .positive()
     .default(10 * 1024 * 1024),
   VISION_PROVIDER: z.enum(["mock", "meta"]).default("mock"),
+  REASONING_PROVIDER: z.enum(["mock", "meta"]).default("mock"),
   META_API_KEY: z.string().trim().optional(),
   META_API_BASE_URL: z.string().url().default("https://api.meta.ai/v1"),
   META_SAM_MODEL: z.string().trim().default("sam-3.1"),
+  META_MUSE_MODEL: z.string().trim().default("muse-spark-1.3"),
   META_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
 });
 

@@ -120,6 +120,26 @@ export interface ScanComparison {
   targetScan: Scan;
 }
 
+export interface AssistantEvidence {
+  observationId: string;
+  scanId: string;
+  trackedObjectId: string | null;
+  label: string;
+  description: string;
+  capturedAt: string;
+  imageUrl: string;
+  boundingBox: BoundingBox;
+}
+
+export interface AssistantAnswer {
+  answer: string;
+  provider: "mock" | "meta";
+  evidence: AssistantEvidence[];
+  supportingScanIds: string[];
+  supportingObservationIds: string[];
+  uncertaintyNotes: string[];
+}
+
 export interface Room {
   id: string;
   name: string;

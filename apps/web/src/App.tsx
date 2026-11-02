@@ -3,6 +3,7 @@ import { AppShell } from "./components/app-shell";
 import { DashboardPage } from "./pages/dashboard-page";
 import { RoomPage } from "./pages/room-page";
 import { ScanPage } from "./pages/scan-page";
+import { AssistantPage } from "./pages/assistant-page";
 import { ObjectPage } from "./pages/object-page";
 import {
   ComparisonBuilderPage,
@@ -17,6 +18,7 @@ export function App() {
         <Route path="rooms/:roomId" element={<RoomPage />} />
         <Route path="scans/:scanId" element={<ScanPage />} />
         <Route path="objects/:objectId" element={<ObjectPage />} />
+        <Route path="rooms/:roomId/assistant" element={<AssistantPage />} />
         <Route
           path="rooms/:roomId/compare"
           element={<ComparisonBuilderPage />}

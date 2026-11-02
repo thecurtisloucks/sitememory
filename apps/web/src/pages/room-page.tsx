@@ -4,6 +4,7 @@ import {
   Boxes,
   Clock3,
   GitCompareArrows,
+  MessageCircle,
   ScanLine,
   Trash2,
 } from "lucide-react";
@@ -65,6 +66,11 @@ export function RoomPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to={`/rooms/${roomId}/assistant`}>
+            <Button variant="secondary">
+              <MessageCircle size={16} /> Ask SiteMemory
+            </Button>
+          </Link>
           {(scans.data?.filter((scan) => scan.status === "COMPLETED").length ??
             0) >= 2 ? (
             <Link to={`/rooms/${roomId}/compare`}>

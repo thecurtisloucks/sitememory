@@ -1,4 +1,5 @@
 import type {
+  AssistantAnswer,
   ApiError,
   ApiSuccess,
   CreateRoomInput,
@@ -138,5 +139,25 @@ export const comparisonsApi = {
   get: async (comparisonId: string) =>
     normalizeComparison(
       await request<ScanComparison>(`/api/comparisons/${comparisonId}`),
+    ),
+};
+
+function normalizeAssistantAnswer(answer: AssistantAnswer): AssistantAnswer {
+  return {
+    ...answer,
+    evidence: answer.evidence.map((evidence) => ({
+      ...evidence,
+      imageUrl: `${baseUrl}${evidence.imageUrl}`,
+    })),
+  };
+}
+
+export const assistantApi = {
+  ask: async (roomId: string, question: string) =>
+    normalizeAssistantAnswer(
+      await request<AssistantAnswer>(`/api/rooms/${roomId}/ask`, {
+        method: "POST",
+        body: JSON.stringify({ question }),
+      }),
     ),
 };

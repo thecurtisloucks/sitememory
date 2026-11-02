@@ -657,6 +657,8 @@ Milestone 4 — AI Assistant
 
 Target: November 2
 
+Status: implemented and verified November 2, 2026.
+
 Tasks:
 
 - Integrate Muse reasoning.

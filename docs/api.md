@@ -36,3 +36,9 @@ Completed scans associate high-confidence detections with a persistent tracked o
 - `GET /api/comparisons/:comparisonId`
 
 Both scans must be completed, distinct, and belong to the requested room. Comparisons are persisted and classify changes as `UNCHANGED`, `MOVED`, `NEWLY_VISIBLE`, `NO_LONGER_VISIBLE`, or `UNCERTAIN`. `NO_LONGER_VISIBLE` means the object was not detected in the newer image; it does not claim the object was removed from the room.
+
+## Assistant
+
+- `POST /api/rooms/:roomId/ask` with `{ "question": string }`
+
+The retrieval layer selects at most 12 relevant observations before invoking the configured reasoning provider. Change questions derive classifications from the two most recent completed scans. The response contains the natural-language answer, provider provenance, supporting scan and observation identifiers, visual evidence records, and uncertainty notes. A specific object question with no matching observation returns no substitute evidence.

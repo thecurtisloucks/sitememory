@@ -16,12 +16,15 @@ Checked: November 2, 2026
 - A non-streaming `POST /v1/responses` completed through the application's `MetaVisionProvider` and official parser.
 - The validation used Meta's public `assets/images/test_image.jpg` with the noun phrase `child`; six segmented objects were parsed in approximately 2.6 seconds.
 - No credential or raw response was printed or committed.
+- The model catalog included `muse-spark-1.3` and the other current Muse Spark variants.
+- A low-effort `muse-spark-1.3` Responses API request completed through the application's `MetaReasoningProvider` with a non-empty evidence-grounded answer in approximately 2.4 seconds.
 
 The live provider is therefore available when `VISION_PROVIDER="meta"`. Mock inference remains useful for deterministic development and tests.
 
 ## Still required before judging
 
 - Run the intended room-photo demo flow with the four configured object prompts.
+- Run assistant questions against those real room observations and retain the evidence-linked result for the demo.
 - Confirm current account quota and pricing in the Meta developer console.
 - Keep a mock-provider fallback ready in case the external service is unavailable during judging.
 
@@ -31,3 +34,5 @@ The live provider is therefore available when `VISION_PROVIDER="meta"`. Mock inf
 - https://ai.meta.com/llama/
 - https://github.com/meta-models/meta-sam
 - https://dev.meta.ai/docs/sam/client-libraries
+- https://dev.meta.ai/docs/protocols/responses
+- https://dev.meta.ai/docs/models
